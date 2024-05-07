@@ -151,13 +151,13 @@ class CustomerRepository {
     }
   }
 
-  async AddCartItem(customerId, { _id, name, price, banner }, qty, isRemove) {
+  async AddCartItem(customerId, product, qty, isRemove) {
     try {
       const profile = await CustomerModel.findById(customerId).populate("cart");
 
       if (profile) {
         const cartItem = {
-          product: { _id, name, price, banner },
+          product,
           unit: qty,
         };
 

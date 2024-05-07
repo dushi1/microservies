@@ -41,8 +41,11 @@ class ShoppingService {
   }
 
   async SubscribeEvents(payload) {
-    payload = JSON.parse(payload);
+    if (typeof payload === "string") {
+      payload = JSON.parse(payload);
+    }
     const { event, data } = payload;
+    console.log(event, data, payload, "-=-==-=-payload");
     const { userId, product, qty } = data;
 
     switch (event) {

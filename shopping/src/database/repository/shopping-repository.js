@@ -20,8 +20,6 @@ class ShoppingRepository {
   }
 
   async AddCartItem(customerId, item, qty, isRemove) {
-    // return await CartModel.deleteMany();
-
     const cart = await CartModel.findOne({ customerId: customerId });
 
     const { _id } = item;

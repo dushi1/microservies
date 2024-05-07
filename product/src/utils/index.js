@@ -1,8 +1,15 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
+const amqplib = require("amqplib");
+// const axios = require("axios");
 
-const { APP_SECRET } = require("../config");
+const {
+  APP_SECRET,
+  CLOUDAMQP_URL,
+  CUSTOMER_BINDING_KEY,
+  SHOPPING_BINDING_KEY,
+  EXCHANGE_NAME,
+} = require("../config");
 
 //Utility functions
 module.exports.GenerateSalt = async () => {
@@ -51,10 +58,32 @@ module.exports.FormateData = (data) => {
   }
 };
 
-module.exports.publishCustomerEvents = async (payload) => {
-  axios.post("localhost:8000/customer/app-events", payload);
-};
+// module.exports.publishCustomerEvents = async (payload) => {
+//   axios.post("http://localhost:8000/customer/app-events", { payload });
+// };
 
-module.exports.publishShoppingEvents = (data) => {
-  axios.post("localhost:8000/shopping/app-events", payload);
+// module.exports.publishShoppingEvents = (payload) => {
+//   axios.post("http://localhost:8000/shopping/app-events", { payload });
+// };
+
+//message broker
+
+//create channel
+module.exports.CreateChannel = async () => {
+  try {
+    const connection = await amqplib.connect(CLOUDAMQP_URL);
+    const channel = await connection.createChannel();
+    await channel.assertQueue(EXCHANGE_NAME, "direct", { durable: true });
+    return channel;
+  } catch (err) {
+    console.log("RabbitMQ connection error:", err);
+    throw err;
+  }
 };
+//publish msg
+module.exports.PublishMessage = (channel, service, msg) => {
+  channel.publish(EXCHANGE_NAME, service, Buffer.from(msg));
+  console.log("Sent: ", msg);
+};
+//subscribe msg
+module.exports.SubscribeMessage = async (channel, service) => {};

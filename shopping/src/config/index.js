@@ -1,4 +1,5 @@
 const dotEnv = require("dotenv");
+const { QUEUE_NAME } = require("../../../customer/src/config");
 
 // if (process.env.NODE_ENV !== "prod") {
 //   const configFile = `.env.${process.env.NODE_ENV}`;
@@ -11,4 +12,9 @@ module.exports = {
   PORT: process.env.PORT,
   DB_URL: process.env.MONGODB_URI,
   APP_SECRET: process.env.APP_SECRET,
+  CLOUDAMQP_URL: process.env.CLOUDAMQP_URL,
+  EXCHANGE_NAME: process.env.EXCHANGE_NAME,
+  SHOPPING_BINDING_KEY: process.env.SHOPPING_BINDING_KEY,
+  CUSTOMER_BINDING_KEY: process.env.CUSTOMER_BINDING_KEY,
+  QUEUE_NAME: "shopping-queue",
 };

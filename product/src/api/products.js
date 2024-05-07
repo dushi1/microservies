@@ -1,8 +1,9 @@
+const { SHOPPING_BINDING_KEY, CUSTOMER_BINDING_KEY } = require("../config");
 const ProductService = require("../services/product-service");
-const { publishCustomerEvents, publishShoppingEvents } = require("../utils");
+const { PublishMessage } = require("../utils");
 const UserAuth = require("./middlewares/auth");
 
-module.exports = (app) => {
+module.exports = (app, channel) => {
   const service = new ProductService();
 
   app.post("/product/create", async (req, res, next) => {
@@ -66,7 +67,8 @@ module.exports = (app) => {
         { productId: req.body._id },
         "ADD_TO_WISHLIST"
       );
-      publishCustomerEvents(data);
+      // await publishCustomerEvents(data);
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
       return res.status(200).json(data.data.product);
     } catch (err) {}
   });
@@ -81,7 +83,8 @@ module.exports = (app) => {
         { productId },
         "REMOVE_FROM_CART"
       );
-      publishCustomerEvents(data);
+      // await publishCustomerEvents(data);
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
       return res.status(200).json(data.data.product);
     } catch (err) {
       next(err);
@@ -90,20 +93,22 @@ module.exports = (app) => {
 
   app.put("/cart", UserAuth, async (req, res, next) => {
     const { _id } = req.user;
-
     try {
       const { data } = await service.GetProductPayload(
         _id,
         { productId: req.body._id, qty: req.body.qty },
-        "REMOVE_FROM_WISHLIST"
+        "ADD_TO_CART"
       );
-      publishCustomerEvents(data);
-      publishShoppingEvents(data);
+      // publishCustomerEvents(data);
+      // publishShoppingEvents(data);
+
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+      PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
       const response = {
         product: data.data.product,
         unit: data.data.qty,
       };
-      return res.status(200).json(response);
+      return res.status(201).json(response);
     } catch (err) {
       next(err);
     }
@@ -119,8 +124,10 @@ module.exports = (app) => {
         { productId, qty: req.body.qty },
         "REMOVE_FROM_WISHLIST"
       );
-      publishCustomerEvents(data);
-      publishShoppingEvents(data);
+      // publishCustomerEvents(data);
+      // publishShoppingEvents(data);
+      PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+      PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
       const response = {
         product: data.data.product,
         unit: data.data.qty,
